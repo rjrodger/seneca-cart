@@ -48,7 +48,8 @@ describe('engage', function() {
         assert.ok(null!=table.entries)
         assert.ok(_.isArray(table.entries))
         assert.equal(1,table.entries.length)
-        assert.ok(gex("{id:'*',product:'app01',data:{name:'apple',price:1,code:'app01',id:'*'}}")
+        //console.log(squish(table.entries[0]))
+        assert.ok(gex("{id:'*',product:'app01',name:'apple',price:1,type:'product',order:*,data:*}")
                   .on(squish(table.entries[0])))
       })
     })
@@ -68,7 +69,8 @@ describe('engage', function() {
         assert.ok(null!=table.entries)
         assert.ok(_.isArray(table.entries))
         assert.equal(1,table.entries.length)
-        assert.ok(gex("{id:'*',product:'ora02',data:{name:'orange',price:2,code:'ora02',id:'*'}}")
+        //console.log(squish(table.entries[0]))
+        assert.ok(gex("{id:'*',product:'ora02',name:'orange',price:2,type:'product',order:*,data:*}")
                   .on(squish(table.entries[0])))
       })
     })
@@ -88,8 +90,55 @@ describe('engage', function() {
         assert.ok(null!=table.entries)
         assert.ok(_.isArray(table.entries))
         assert.equal(1,table.entries.length)
-        assert.ok(gex("{id:'*',product:'ora02',data:{name:'orange',price:2,code:'ora02',id:'*'}}")
+        console.log(squish(table.entries[0]))
+        assert.ok(gex("{id:'*',product:'ora02',name:'orange',price:2,type:'product',order:*,data:*}")
                   .on(squish(table.entries[0])))
+      })
+    })
+  })
+
+
+  it('salestax', function() {
+    var mycart
+    cart.add({code:'ora02'},function(err,cartid){
+      assert.ok(null==err)
+      assert.ok(null!=cartid)
+      mycart = cartid
+
+      cart.add({cart:cartid,code:'app01'},function(err,cartid){
+        assert.ok(null==err)
+        assert.equal(mycart,cartid)
+
+
+        cart.table({cart:cartid},function(err,table){
+          assert.equal(2,table.entries.length)
+          assert.equal(3,table.total)
+          
+          cart.salestax({cart:cartid,rate:0.23},function(err,cartid){
+            assert.ok(null==err)
+            assert.equal(mycart,cartid)
+
+            cart.table({cart:cartid},function(err,table){
+              //console.log(util.inspect(table))
+              assert.equal(3,table.entries.length)
+              assert.equal('salestax',table.entries[2].type)
+              assert.equal(3.69,table.total)
+
+
+              cart.add({cart:cartid,code:'ora02'},function(err,cartid){
+                assert.ok(null==err)
+                assert.equal(mycart,cartid)
+
+                cart.table({cart:cartid},function(err,table){
+                  //console.log(util.inspect(table))
+                  assert.equal(4,table.entries.length)
+                  assert.equal('salestax',table.entries[3].type)
+                  assert.equal(6.15,table.total)
+                })
+              })
+            })
+          })
+        })
       })
     })
   })
