@@ -21,7 +21,10 @@ seneca.use( require('..') )
 
 var cart = seneca.pin({role:'cart',cmd:'*'})
 
-var product_ent = seneca.make$('shop','product')
+var product_ent  = seneca.make$('shop','product')
+var cart_ent     = seneca.make$('shop','cart')
+var purchase_ent = seneca.make$('shop','purchase')
+
 var apple  = product_ent.make$({name:'apple',price:1,code:'app01'}).save$(function(e,o){apple=o})
 var orange = product_ent.make$({name:'orange',price:2,code:'ora02'}).save$(function(e,o){orange=o})
 
@@ -135,6 +138,42 @@ describe('engage', function() {
                   assert.equal('salestax',table.entries[3].type)
                   assert.equal(6.15,table.total)
                 })
+              })
+            })
+          })
+        })
+      })
+    })
+  })
+
+
+  it('purchase', function() {
+    var mycart
+    cart.add({code:'ora02'},function(err,cartid){
+      assert.ok(null==err)
+      assert.ok(null!=cartid)
+      mycart = cartid
+
+      cart.add({cart:cartid,code:'app01'},function(err,cartid){
+        assert.ok(null==err)
+        assert.equal(mycart,cartid)
+
+        cart_ent.load$(cartid,function(err,thecart){
+          assert.ok(null==err)
+          assert.equal('open',thecart.status)
+
+          cart.purchase({cart:cartid,buyer:{name:'Alice'}},function(err,out){
+            assert.ok(null==err)
+            //console.log('out',out)
+
+            cart_ent.load$(out.cart,function(err,thecart){
+              assert.ok(null==err)
+              assert.equal('closed',thecart.status)
+
+              purchase_ent.load$(out.purchase,function(err,thepurchase){
+                assert.ok(null==err)
+                //console.log(thepurchase)
+                assert.equal(out.cart,thepurchase.cart)
               })
             })
           })
