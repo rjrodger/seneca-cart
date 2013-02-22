@@ -82,12 +82,12 @@ describe('engage', function() {
 
   it('reqres', function() {
     var req = {}, res = {cookie:function(k,v){req.seneca={engage_token:v}}}
-    cart.add({code:'ora02',req:req,res:res},function(err,cartid){
+    cart.add({code:'ora02',req$:req,res$:res},function(err,cartid){
       assert.ok(null==err)
       assert.ok(null!=cartid)
       assert.ok(_.isString(cartid))
 
-      cart.table({req:req,res:res},function(err,table){
+      cart.table({req$:req,res$:res},function(err,table){
         assert.ok(null==err)
         assert.ok(null!=table)
         assert.ok(null!=table.entries)
