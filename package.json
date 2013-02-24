@@ -22,7 +22,8 @@
     "gex": "0.0.3"
   },
   "dependencies": {
-    "underscore": "~1.4.4"
+    "underscore": "~1.4.4",
+    "nid": "~0.3.0"
   },
   "files": [
     "README.md",
