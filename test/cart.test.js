@@ -93,7 +93,7 @@ describe('engage', function() {
         assert.ok(null!=table.entries)
         assert.ok(_.isArray(table.entries))
         assert.equal(1,table.entries.length)
-        console.log(squish(table.entries[0]))
+        //console.log(squish(table.entries[0]))
         assert.ok(gex("{id:'*',product:'ora02',name:'orange',price:2,type:'product',order:*,data:*}")
                   .on(squish(table.entries[0])))
       })
