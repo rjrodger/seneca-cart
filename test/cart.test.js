@@ -5,7 +5,7 @@
 
 
 
-var assert  = require('assert')
+var assert  = require('chai').assert
 var util    = require('util')
 
 
@@ -19,14 +19,14 @@ seneca.use( 'engage' )
 seneca.use( require('..') )
 
 
-var cart = seneca.pin({role:'cart',cmd:'*'})
+var cartpin = seneca.pin({role:'cart',cmd:'*'})
 
 var product_ent  = seneca.make$('shop','product')
 var cart_ent     = seneca.make$('shop','cart')
 var purchase_ent = seneca.make$('shop','purchase')
 
-var apple  = product_ent.make$({name:'apple',price:1,code:'app01'}).save$(function(e,o){apple=o})
-var orange = product_ent.make$({name:'orange',price:2,code:'ora02'}).save$(function(e,o){orange=o})
+var apple  = product_ent.make$({name:'apple',price:11,code:'app01'}).save$(function(e,o){apple=o})
+var orange = product_ent.make$({name:'orange',price:22,code:'ora02'}).save$(function(e,o){orange=o})
 
 
 function squish(obj) { return util.inspect(obj).replace(/\s+/g,'') }
@@ -40,67 +40,42 @@ describe('engage', function() {
 
 
   it('happy', function() {
-    cart.add({code:'app01'},function(err,cartid){
-      assert.ok(null==err)
-      assert.ok(null!=cartid)
-      assert.ok(_.isString(cartid))
+    cartpin.create({custom1:'value1'},function(err,cart){
+      assert.isNull(err)
+      assert.isNotNull(cart)
+      assert.ok(cart.entity$)
+      assert.equal('open',cart.status)
+      assert.equal('value1',cart.custom1)
 
-      cart.table({cart:cartid},function(err,table){
-        assert.ok(null==err)
-        assert.ok(null!=table)
-        assert.ok(null!=table.entries)
-        assert.ok(_.isArray(table.entries))
-        assert.equal(1,table.entries.length)
-        //console.log(squish(table.entries[0]))
-        assert.ok(gex("{id:'*',product:'app01',name:'apple',price:1,type:'product',order:*,data:*}")
-                  .on(squish(table.entries[0])))
+      // CHECK: this passed through ent methods
+      cartpin.add_entry({code:'app01',cart:cart,entrycustom1:'entryvalue1'},function(err,cart){
+        assert.isNull(err)
+        assert.isNotNull(cart)
+        assert.ok(cart.entity$)
+        assert.equal('open',cart.status)
+        assert.equal(11,cart.total)
+        assert.equal('entryvalue1',cart.entries[0].entrycustom1)
+        assert.ok(gex("{name:'apple',price:11,code:'app01',id:'*',sort:*,quantity:1,entrycustom1:'entryvalue1',type:'product'}")
+                  .on(squish(cart.entries[0])))
       })
     })
   })
 
 
-  it('context', function() {
-    var ctxt = {}
-    cart.add({code:'ora02',context:ctxt},function(err,cartid){
-      assert.ok(null==err)
-      assert.ok(null!=cartid)
-      assert.ok(_.isString(cartid))
-
-      cart.table({context:ctxt},function(err,table){
-        assert.ok(null==err)
-        assert.ok(null!=table)
-        assert.ok(null!=table.entries)
-        assert.ok(_.isArray(table.entries))
-        assert.equal(1,table.entries.length)
-        //console.log(squish(table.entries[0]))
-        assert.ok(gex("{id:'*',product:'ora02',name:'orange',price:2,type:'product',order:*,data:*}")
-                  .on(squish(table.entries[0])))
-      })
+  it('auto-create', function() {
+    cartpin.add_entry({code:'app01'},function(err,cart){
+      assert.isNull(err)
+      assert.isNotNull(cart)
+      assert.ok(cart.entity$)
+      assert.equal('open',cart.status)
+      assert.equal(11,cart.total)
+      assert.equal(1,cart.entries.length)
+      assert.equal('app01',cart.entries[0].code)
     })
   })
 
 
-  it('reqres', function() {
-    var req = {}, res = {cookie:function(k,v){req.seneca={engage_token:v}}}
-    cart.add({code:'ora02',req$:req,res$:res},function(err,cartid){
-      assert.ok(null==err)
-      assert.ok(null!=cartid)
-      assert.ok(_.isString(cartid))
-
-      cart.table({req$:req,res$:res},function(err,table){
-        assert.ok(null==err)
-        assert.ok(null!=table)
-        assert.ok(null!=table.entries)
-        assert.ok(_.isArray(table.entries))
-        assert.equal(1,table.entries.length)
-        //console.log(squish(table.entries[0]))
-        assert.ok(gex("{id:'*',product:'ora02',name:'orange',price:2,type:'product',order:*,data:*}")
-                  .on(squish(table.entries[0])))
-      })
-    })
-  })
-
-
+/*
   it('salestax', function() {
     var mycart
     cart.add({code:'ora02'},function(err,cartid){
@@ -145,35 +120,36 @@ describe('engage', function() {
       })
     })
   })
-
+  */
 
   it('purchase', function() {
     var mycart
-    cart.add({code:'ora02'},function(err,cartid){
+    cartpin.add_entry({code:'ora02'},function(err,cart){
       assert.ok(null==err)
-      assert.ok(null!=cartid)
-      mycart = cartid
+      assert.ok(null!=cart)
+      mycart = cart
 
-      cart.add({cart:cartid,code:'app01'},function(err,cartid){
+      cartpin.add_entry({cart:cart,code:'app01'},function(err,cart){
         assert.ok(null==err)
-        assert.equal(mycart,cartid)
+        assert.equal(mycart.id,cart.id)
 
-        cart_ent.load$(cartid,function(err,thecart){
+        cart_ent.load$(cart.id,function(err,thecart){
           assert.ok(null==err)
           assert.equal('open',thecart.status)
 
-          cart.purchase({cart:cartid,buyer:{name:'Alice'}},function(err,out){
+          cartpin.purchase({cart:cart,buyer:{name:'Alice'}},function(err,out){
             assert.ok(null==err)
             //console.log('out',out)
+            assert.equal(33,out.cart.total)
 
-            cart_ent.load$(out.cart,function(err,thecart){
+            cart_ent.load$(out.cart.id,function(err,thecart){
               assert.ok(null==err)
               assert.equal('closed',thecart.status)
 
-              purchase_ent.load$(out.purchase,function(err,thepurchase){
+              purchase_ent.load$(out.purchase.id,function(err,thepurchase){
                 assert.ok(null==err)
                 //console.log(thepurchase)
-                assert.equal(out.cart,thepurchase.cart)
+                assert.equal(out.cart.id,thepurchase.cart)
               })
             })
           })
@@ -182,5 +158,4 @@ describe('engage', function() {
     })
   })
 
-  
 })

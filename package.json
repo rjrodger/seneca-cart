@@ -19,7 +19,8 @@
   "license": "MIT",
   "devDependencies": {
     "seneca": "~0.5.1",
-    "gex": "0.0.3"
+    "gex": "0.0.3",
+    "chai": "~1.5.0"
   },
   "dependencies": {
     "underscore": "~1.4.4",
