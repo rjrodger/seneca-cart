@@ -40,16 +40,17 @@ describe('engage', function() {
 
 
   it('happy', function() {
-    cartpin.create({custom1:'value1'},function(err,cart){
+    cartpin.create({custom1:'value1'},function(err,out){
       assert.isNull(err)
+      var cart = out.cart
       assert.isNotNull(cart)
       assert.ok(cart.entity$)
       assert.equal('open',cart.status)
       assert.equal('value1',cart.custom1)
 
-      // CHECK: this passed through ent methods
-      cartpin.add_entry({code:'app01',cart:cart,entrycustom1:'entryvalue1'},function(err,cart){
+      cartpin.add_entry({code:'app01',cart:cart,entrycustom1:'entryvalue1'},function(err,out){
         assert.isNull(err)
+        var cart = out.cart
         assert.isNotNull(cart)
         assert.ok(cart.entity$)
         assert.equal('open',cart.status)
@@ -63,8 +64,9 @@ describe('engage', function() {
 
 
   it('auto-create', function() {
-    cartpin.add_entry({code:'app01'},function(err,cart){
+    cartpin.add_entry({code:'app01'},function(err,out){
       assert.isNull(err)
+      var cart = out.cart
       assert.isNotNull(cart)
       assert.ok(cart.entity$)
       assert.equal('open',cart.status)
@@ -124,16 +126,18 @@ describe('engage', function() {
 
   it('purchase', function() {
     var mycart
-    cartpin.add_entry({code:'ora02'},function(err,cart){
+    cartpin.add_entry({code:'ora02'},function(err,out){
       assert.ok(null==err)
+      var cart = out.cart
+
       assert.ok(null!=cart)
       mycart = cart
 
-      cartpin.add_entry({cart:cart,code:'app01'},function(err,cart){
+      cartpin.add_entry({cart:cart,code:'app01'},function(err,out){
         assert.ok(null==err)
-        assert.equal(mycart.id,cart.id)
+        assert.equal(mycart.id,out.cart.id)
 
-        cart_ent.load$(cart.id,function(err,thecart){
+        cart_ent.load$(out.cart.id,function(err,thecart){
           assert.ok(null==err)
           assert.equal('open',thecart.status)
 
