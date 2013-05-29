@@ -20,7 +20,8 @@
   "devDependencies": {
     "seneca": "~0.5.3",
     "gex": "0.0.3",
-    "chai": "~1.5.0"
+    "chai": "~1.5.0",
+    "seneca-engage": "~0.1.1"
   },
   "dependencies": {
     "underscore": "~1.4.4",
