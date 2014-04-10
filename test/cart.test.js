@@ -77,53 +77,6 @@ describe('engage', function() {
   })
 
 
-/*
-  it('salestax', function() {
-    var mycart
-    cart.add({code:'ora02'},function(err,cartid){
-      assert.ok(null==err)
-      assert.ok(null!=cartid)
-      mycart = cartid
-
-      cart.add({cart:cartid,code:'app01'},function(err,cartid){
-        assert.ok(null==err)
-        assert.equal(mycart,cartid)
-
-
-        cart.table({cart:cartid},function(err,table){
-          assert.equal(2,table.entries.length)
-          assert.equal(3,table.total)
-          
-          cart.salestax({cart:cartid,rate:0.23},function(err,cartid){
-            assert.ok(null==err)
-            assert.equal(mycart,cartid)
-
-            cart.table({cart:cartid},function(err,table){
-              //console.log(util.inspect(table))
-              assert.equal(3,table.entries.length)
-              assert.equal('salestax',table.entries[2].type)
-              assert.equal(3.69,table.total)
-
-
-              cart.add({cart:cartid,code:'ora02'},function(err,cartid){
-                assert.ok(null==err)
-                assert.equal(mycart,cartid)
-
-                cart.table({cart:cartid},function(err,table){
-                  //console.log(util.inspect(table))
-                  assert.equal(4,table.entries.length)
-                  assert.equal('salestax',table.entries[3].type)
-                  assert.equal(6.15,table.total)
-                })
-              })
-            })
-          })
-        })
-      })
-    })
-  })
-  */
-
   it('purchase', function() {
     var mycart
     cartpin.add_entry({code:'ora02'},function(err,out){
@@ -141,7 +94,7 @@ describe('engage', function() {
           assert.ok(null==err)
           assert.equal('open',thecart.status)
 
-          cartpin.purchase({cart:cart,buyer:{name:'Alice'}},function(err,out){
+          cartpin.purchase({cart:out.cart.id,buyer:{name:'Alice'}},function(err,out){
             assert.ok(null==err)
             //console.log('out',out)
             assert.equal(33,out.cart.total)
