@@ -18,11 +18,11 @@
   "author": "Richard Rodger (@rjrodger)",
   "license": "MIT",
   "devDependencies": {
-    "gex": "~0.1.3",
+    "gex": "~0.1.4",
     "seneca-engage": "~0.2.1",
     "chai": "~1.9.1",
-    "seneca": "~0.5.16",
-    "mocha": "~1.18.2"
+    "seneca": "~0.5.18",
+    "mocha": "~1.20.1"
   },
   "dependencies": {
     "nid": "~0.3.2",
