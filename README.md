@@ -126,4 +126,35 @@ A wrapper around the `purchase` command that uses the `user` plugin to automatic
 Example
 -------
 
-TODO
+```JavaScript
+var seneca = require('seneca')()
+
+seneca.use( 'engage' )
+seneca.use( require('..') )
+
+var cartpin = seneca.pin({role:'cart',cmd:'*'})
+
+var product_ent  = seneca.make$('shop','product')
+var cart_ent     = seneca.make$('shop','cart')
+var purchase_ent = seneca.make$('shop','purchase')
+
+var apple  = product_ent.make$({name:'apple',price:11,code:'app01'}).save$(function(e,o){apple=o})
+var orange = product_ent.make$({name:'orange',price:22,code:'ora02'}).save$(function(e,o){orange=o})
+
+cartpin.create({custom1:'value1'},function(err,out){
+  console.log(cart.status) // => 'open'
+  console.log(cart.custom1) // => 'value1'
+
+  cartpin.add_entry({code:'app01',cart:cart,entrycustom1:'entryvalue1'},function(err,out){
+    var cart = out.cart
+    console.log(cart.total) // => 11
+    console.log(cart.entries[0]) // => {name:'apple',...}
+
+    cartpin.purchase({cart:out.cart.id,buyer:{name:'Alice'}},function(err,out){
+      console.log('out',out)
+      console.log(out.cart.status) // => 'closed'
+    })
+  })
+})
+
+```
