@@ -130,7 +130,7 @@ Example
 var seneca = require('seneca')()
 
 seneca.use( 'engage' )
-seneca.use( require('..') )
+seneca.use( 'cart' )
 
 var cartpin = seneca.pin({role:'cart',cmd:'*'})
 
